@@ -1,0 +1,200 @@
+---
+title: "Assignment"
+author: "SangeunLee"
+date: "2023-05-19"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Question1
+###
+##### A. Produce a plot and a between the response and predictors and relationships between the predictors themselves.
+```{r , echo=TRUE }
+pm <- read.csv("pm25.csv", header = TRUE)
+ plot(pm)
+```
+```{r , echo=FALSE }
+cor(pm)
+```
+*BETWEEN THE RESPONSE AND PREDICTORS*  
+1)Between temperature and pm25 is a positive 0.57-. It means that when temperature increase, pm25 increases together. And when temperature decrease, also pm25 decrease.  
+2)Between humidity and pm25 is a negative -0.71-. It means that when humidity is increased, pm25 changes the opposite way. Also, humidity decreases, and pm25 increases.  
+3)Between wind and pm25 is a negative -0.21. It means that when wind increases, pm25 decreases a little. The opposite way is the same.  
+4)Between precipitation and pm25 is a positive 0.03. It means that precipitation and pm25 almost does not have any relation to each other. We can say they are weakly positive.  
+
+*BETWEEN THE PREDICTORS THEMSELVES*  
+1)Between temperature and humidity is a weak negative -0.07-. They almost don’t have relation each other.  
+2)Between temperature and wind is a weak positive 0.02-. They almost don’t have relation each other.  
+3)Between temperature and precipitation is a weak negative -0.05-. They almost don’t have relation each other.  
+4)Between humidity and wind is a weak positive 0.12-. If humidity increases, wind slightly can be increased.  
+5)Between humidity and precipitation is a weak negative -0.13-. They almost don’t have relation each other.  
+6)Between wind and precipitation is a weak negative -0.01-. They almost don’t have relation each other.   
+
+For pm25, the predictors of temperature and humidity have a strong relationship. Meanwhile, Between the predictor factors are not associated with each other well.  
+  
+    
+       
+##### B.  
+• Fit a model using all the predictors to explain the pm25 response.  
+```{r , echo=TRUE }
+fitpm <- lm(pm25~ temperature+humidity+wind+precipitation, data = pm)
+summary(fitpm)
+
+```
+• Using the full model, estimate the impact of humidity on PM2.5 concentration.  
+Do this by
+producing a 95% confidence interval that quantifies the change in PM2.5 concentration for each extra percentage of relative humidity and comment.
+
+The coefficient estimate for humanity is -1.27742. It means pm25 concentration decreases by 1.27742 in each percentage of humidity.
+When producing a 95% confidence interval: The standard error is 0.11854, and also T-value is -10.776. Moreover, Degrees of Freedom is 51. Therefore, the critical t-value is 2.009.
+CI = -1.27742±2.009(0.11854) = -1.516 and -1.039. It means that we can say that it is confident that 95% of each relative percentage of humidity is associated with -1.516 to -1.039.  
+
+##### c. [14 marks] Conduct an F-test for the overall regression i.e. is there any relationship between the response and the predictors. In your answer:
+• Write down the mathematical multiple regression model for this situation, defining all appropriate parameters.  
+**Yi = β₀ + β₁ * x₁ + β₂ * x₂ + β₃ * x₃ + β₄ * x₄ + ε.   **  
+1)Yi = pm2.5 response variable    
+2)x₁,x₂,x₃,x₄ is independent variables    
+3)β₀,β₁,β₂,β₃,β₄ is unknown estimated vairables   
+4)x₁ is temperature  
+5)x₂ is humidity  
+6)x₃ is wind  
+7)x₄ is precipitation  
+8) ε is the error term  
+• Write down the Hypotheses for the Overall ANOVA test of multiple regression.  
+H₀ = Between pm2.5(response variable) and predictor factors(temperature, humidity, wind, precipitation) has no significant relationship.  
+H₁ =Between pm2.5(response variable) and predictor factors(temperature, humidity, wind, precipitation) has a significant relationship.  
+```{r , echo=TRUE }
+anova(fitpm)
+```
+• Produce an ANOVA table for the overall multiple regression model (One combined regression SSsource is sufficient). 
+
+```{r }
+anovatable <- data.frame(
+  source = c("Regression","Residual", "Total" ),
+  df = c(4,51,55),
+  Sum_square = c(22398.5, 5160.6, 27505.1),
+  Mean_square  = c(5599.625 , 101.2, ""),
+  F_statistic = c(55.33226285, "", ""))
+
+```
+
+| Source | df | Sum_square|Mean_square|F_statistic|
+|------|-----|----------|----------|----------|
+| Regression | 4  | 22398.5 |5599.625|55.33226285|
+| Residual | 51  | 5160.6   |101.2|
+| Total | 55  | 27505.1    |
+• Compute the F statistic for this test.  
+ F-statistic= 5599.625/101.2 = 55.33226285  
+• State the Null distribution for the test statistic.  
+Null distribution = F(4,51)
+• Compute the P-Value  
+P-value = P(F(4,51) >= 55.33226285) = <2.2e-16<0.05  
+• State your conclusion (both statistical conclusion and contextual conclusion).  
+*Reject the null hypothesis.*  
+In this analysis, we can discuss that pm2.5 and predictors(temperature, humidity, wind, precipitation) has a significant relationship. ( Generally, at least one of the predictors is associated with pm2.5. ) In terms of this result, predictors considerably affect pm2.5 concentration.
+
+##### d. [10 marks] Validate the full model and comment on whether the full regression model is appropriate to explain the PM2.5 concentration at various test locations.
+```{r , echo=TRUE }
+par(mfrow = c(1, 2))
+plot(fitpm, which = 1:2)
+```
+
+```{r , echo=TRUE }
+par(mfrow = c(2, 2))
+plot(resid(fitpm) ~ temperature + humidity + wind + precipitation, data = pm)
+
+```
+
+1) The normal quantile-quantile (Q-Q) plot of residuals is primarily linear, indicating that the errors are approximately normally distributed.  
+2) The plot of residuals against the fitted values shows an unclear pattern.  
+3) The plots of residuals against the predictor variables also do not show any decisive pattern. Therefore, the linear model appears to be suitable.  
+4) In conclusion,in terms of assuming of independence, it seems satisfies all the necessary conditions. 
+
+##### e. [2 marks] Find the R2 and comment on what it means in the context of this dataset.  
+R2 = 0.8127-. Therefore regression model shows 81.27% of the variance in the response variable.  
+
+##### f. [3 marks] Using model selection procedures discussed in the course, find the best multiple regression model that explains the data. State the final fitted regression model.  
+As mentioned before, precipitation is almost no relation to pm25. Therefore, we are able to make a model which removes the precipitation factor. Moreover, Let's compare it with the original one.
+```{r , echo=TRUE }
+fitpm <- lm(pm25~ temperature+humidity+wind, data = pm)
+summary(fitpm)
+```
+As we can see, the new model's F-statistic is more extensive than the original model. Consequently, we can set the final model like this.  
+*pm25 = 97.3234 + 1.6267 x temperature - 1.2698 x humidity - 0.5806 x wind*  
+
+
+##### g. [3 marks] Comment on the R2 and adjusted R2 in the full and final model you chose in part f. In particular explain why those goodness of fitness measures change but not in the same way.
+The R-square value is 0.8127(81.27%) in the full model, which has all predictor factors. The adjusted R-square value is 0.7981. 
+In question F, we deleted the factor precipitation as it is not important to the response variable pm25. In the final model, the R-squared value is 0.812. And the adjusted R-square value is 0.8011.
+The predictor factors in the final model's R-square value are the same. Even after getting rid of the precipitation, it barely influences to model. It means it does not have a massive difference after removing the factor of precipitation. Even though the final model's adjusted R-square value is decreased, still value is high. Therefore, the factors which excluded precipitation highly have a relationship with pm25.  
+
+###
+###
+
+#### Question2
+###
+##### a. [2 marks] For this study, is the design balanced or unbalanced? Explain why
+```{r , echo=TRUE }
+movie<- read.csv("movie.csv", header=TRUE)
+table(movie[,1:2])
+```
+There is an unequal size in this study, so the design is unbalanced. 
+
+### 
+##### b. Construct two different preliminary graphs that investigate different features of the data and comment.
+
+```{r movie, echo=TRUE}
+interaction.plot(movie$Gender, movie$Genre, movie$Score, trace.label="score", xlab="gender", ylab="score", col= 1:6)
+```
+
+### 
+
+
+```{r , echo=TRUE}
+interaction.plot(movie$Genre, movie$Gender, movie$Score, trace.label="gender", xlab="genre", ylab="score", col= 1:3)
+```
+The interaction plots, In both plot results,  all of them have a different slope level and cross each other. For these results, Both Gender and Genre effects to Score.  
+```{r , echo=TRUE}
+boxplot(Score~ Gender+Genre, data=movie)
+```
+Female participants normally have high score than Male's. 
+
+### 
+##### c. Write down the full mathematical model for this situation, defining all appropriate parameters.  
+*Yi =μ + αi+ βj + Yij + Σijk*  
+1)Yi = score 
+2)μ = mean  
+3)αi = gender effect ith  
+4)βj = genre effect jth  
+5)Yij = interaction effect between two factors genre and gender  
+6)Σijk = error, residual 
+
+### 
+##### d. Analyse the data to study the effect of Gender and Genre on the brand recall Score. These conclusions are only required to be at the qualitative level and can be based off the outcomes of the hypothesis tests you conducted in this part and the preliminary plots in part b. You do not need to statistically examine the multiple comparisons between contrasts and interactions. Remember to
+
+• state the null and alternative hypothesis for each test, and  
+H0 : Yij = 0 for all i, j  
+H1 : at least one Yij non-zero  
+• check assumptions.  
+The equal variance requirement seems adequate in the residual plot.
+```{r movie , echo=TRUE}
+fitmovie= lm(movie$Score~ movie$Gender+movie$Genre)
+summary(fitmovie)
+par(mfrow = c(1, 2))
+plot(fitmovie, which=1:2)
+
+```
+In the Residual vs Fitted plot, we can define this clearly, as a linear diagonal line.
+In a normal Q-Q plot, points follow the line. It can be said that residual is normally distributed.
+
+```{r  , echo=TRUE}
+boxplot(movie$Score~movie$Gender+movie$Genre)
+```
+
+###
+
+##### e. [2 marks] Based on your results from part d), discuss the practical implications of your findings for the business that aims to maximise the brand recognition from the placement. What advice/interpretation would you provide on the effect drama genre on the brand recall Score.  
+Based on the result, it is evident that both gender and genre appear to have a significant impact on brand scores. However, when it comes to increasing the brand score, targeting a male audience can bring better results. Additionally, it is expected that a higher score can be obtained if the comedy genre is included, and this also applies to dramas. As a result, both gender and genre have a significant effect on the score, so a strategy should be established considering those factors.
